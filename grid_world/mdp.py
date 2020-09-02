@@ -13,6 +13,7 @@ Reward = float
 Prob = float
 MDP = Dict[Tuple[State, Action], List[Tuple[State, Reward, Prob]]]
 Policy = Dict[State, Dict[Action, Prob]]
+Value = List[float]
 
 def build_mdp() -> MDP:
     """
@@ -36,29 +37,6 @@ def random_policy() -> Policy:
         policy_dict[s] = {action: 0.25 for action in list(Action)}
 
     return policy_dict
-
-def policy_eval(mdp: MDP, policy: Policy):
-    V = [0] * 16
-    gamma = 1.0
-    theta = 0.01
-
-    while True:
-        delta = 0.0
-        for s in range(1, 4*4-1):
-            orig_v = V[s]
-            new_v = 0
-            for action in list(Action):
-                p_pi = policy[s][action]
-                sum_s_r = sum([p_transition * (r + gamma * V[s_]) for (s_, r, p_transition) in mdp[(s, action)]])
-                new_v += p_pi * sum_s_r
-            V[s] = new_v
-            delta = max(delta, abs(orig_v - new_v))
-        print(delta)
-        print(V)
-        print()
-        if delta < theta:
-            break
-    return V
 
 def matplot_bar3d_ex(V):
     import numpy as np
@@ -141,8 +119,6 @@ def plot_v(V):
 
 if __name__ == "__main__":
     mdp = build_mdp()
-    V = policy_eval(mdp, random_policy())
-
     # plot_v(V)
     # plotly_example()
-    matplot_bar3d_ex(V)
+    # matplot_bar3d_ex(V)
