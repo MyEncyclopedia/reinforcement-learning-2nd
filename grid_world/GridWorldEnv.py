@@ -62,7 +62,7 @@ class GridWorldEnv(discrete.DiscreteEnv):
         action_delta = {Action.UP: (-1, 0), Action.DOWN: (1, 0), Action.LEFT: (0, -1), Action.RIGHT: (0, 1)}
         for s in range(0, MAX_R * MAX_C):
             P[s] = {a.value : [] for a in list(Action)}
-            is_terminal = (s == 0) or (s == MAX_R * MAX_C - 1)
+            is_terminal = self.is_terminal(s)
             if is_terminal:
                 for a in list(Action):
                     P[s][a.value] = [(1.0, s, 0, True)]
@@ -77,6 +77,8 @@ class GridWorldEnv(discrete.DiscreteEnv):
 
         super(GridWorldEnv, self).__init__(nS, nA, P, isd)
 
+    def is_terminal(self, s: State) -> bool:
+        return (s == 0) or (s == self.shape[0] * self.shape[1] - 1)
 
     def _render(self, mode='human', close=False):
         """ Renders the current gridworld layout
