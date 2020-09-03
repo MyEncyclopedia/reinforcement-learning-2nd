@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Set
 
 
 class Action(Enum):
@@ -14,6 +14,8 @@ Prob = float
 MDP = Dict[Tuple[State, Action], List[Tuple[State, Reward, Prob]]]
 Policy = Dict[State, Dict[Action, Prob]]
 Value = List[float]
+StateSet = Set[int]
+NonTerminalStateSet = Set[int]
 
 def build_mdp() -> MDP:
     """
