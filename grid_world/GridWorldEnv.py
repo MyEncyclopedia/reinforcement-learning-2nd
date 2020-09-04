@@ -16,33 +16,16 @@ class Action(Enum):
 State = int
 Reward = float
 Prob = float
-# MDP = Dict[Tuple[State, Action], List[Tuple[State, Reward, Prob]]]
 Policy = Dict[State, Dict[Action, Prob]]
 Value = List[float]
 StateSet = Set[int]
 NonTerminalStateSet = Set[int]
-
-# P[s][a] = [(prob, next_state, reward, is_done), ...]
 MDP = Dict[State, Dict[Action, List[Tuple[Prob, State, Reward, bool]]]]
+# P[s][a] = [(prob, next_state, reward, is_done), ...]
 
 class GridWorldEnv(discrete.DiscreteEnv):
     """
-    Grid World environment from Sutton's Reinforcement Learning book chapter 4.
-    You are an agent on an MxN grid and your goal is to reach the terminal
-    state at the top left or the bottom right corner.
-
-    For example, a 4x4 grid looks as follows:
-
-    T  o  o  o
-    o  x  o  o
-    o  o  o  o
-    o  o  o  T
-
-    x is your position and T are the two terminal states.
-
-    You can take actions in each direction (UP=0, RIGHT=1, DOWN=2, LEFT=3).
-    Actions going off the edge leave you in your current state.
-    You receive a reward of -1 at each step until you reach a terminal state.
+    Grid World environment described in Sutton and Barto Reinforcement Learning 2nd, chapter 4.
     """
 
     def __init__(self, shape=[4,4]):
