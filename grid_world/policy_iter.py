@@ -1,16 +1,17 @@
 from typing import Tuple
 
-from GridWorldEnv import GridWorldEnv, Policy, StateValue, ActionValue
+from GridWorldEnv import GridWorldEnv, Policy, StateValue, ActionValue, State
 from plot import matplot_bar3d_ex
 from policy_eval import policy_evaluate
 import numpy as np
 
-def action_value(env: GridWorldEnv, state: int, V: StateValue, gamma=1.0) -> ActionValue:
+def action_value(env: GridWorldEnv, state: State, V: StateValue, gamma=1.0) -> ActionValue:
     q = np.zeros(env.nA)
     for a in range(env.nA):
         for prob, next_state, reward, done in env.P[state][a]:
             q[a] += prob * (reward + gamma * V[next_state])
     return q
+
 
 def policy_improvement(env: GridWorldEnv, policy: Policy, V: StateValue, gamma=1.0) -> bool:
     policy_stable = True
