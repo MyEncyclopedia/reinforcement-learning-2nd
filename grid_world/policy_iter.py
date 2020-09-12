@@ -1,22 +1,24 @@
 from typing import Tuple
 
-from GridWorldEnv import GridWorldEnv, Policy, Value
+from GridWorldEnv import GridWorldEnv, Policy, StateValue, ActionValue
 from plot import matplot_bar3d_ex
 from policy_eval import policy_evaluate
 import numpy as np
 
+def action_value(env: GridWorldEnv, state: int, V: StateValue, gamma=1.0) -> ActionValue:
+    q = np.zeros(env.nA)
+    for a in range(env.nA):
+        for prob, next_state, reward, done in env.P[state][a]:
+            q[a] += prob * (reward + gamma * V[next_state])
+    return q
 
-def policy_improvement(env: GridWorldEnv, policy: Policy, V: Value, gamma=1.0) -> bool:
+def policy_improvement(env: GridWorldEnv, policy: Policy, V: StateValue, gamma=1.0) -> bool:
     policy_stable = True
 
     for s in range(env.nS):
         old_action = np.argmax(policy[s])
-
-        q_values = np.zeros(env.nA)
-        for a in range(env.nA):
-            for prob, next_state, reward, done in env.P[s][a]:
-                q_values[a] += prob * (reward + gamma * V[next_state])
-        best_action = np.argmax(q_values)
+        Q_s = action_value(env, s, V)
+        best_action = np.argmax(Q_s)
         policy[s] = np.eye(env.nA)[best_action]
 
         if old_action != best_action:
@@ -24,14 +26,16 @@ def policy_improvement(env: GridWorldEnv, policy: Policy, V: Value, gamma=1.0) -
     return policy_stable
 
 
-def policy_iteration(env: GridWorldEnv, policy: Policy, gamma=1.0) -> Tuple[Policy, Value]:
+def policy_iteration(env: GridWorldEnv, policy: Policy, gamma=1.0) -> Tuple[Policy, StateValue]:
     iter = 0
     while True:
         V = policy_evaluate(policy, env, gamma)
         policy_stable = policy_improvement(env, policy, V)
+        matplot_bar3d_ex(V, f'Iteration {iter}')
+        iter += 1
+
         if policy_stable:
             return policy, V
-        iter += 1
 
 
 if __name__ == '__main__':

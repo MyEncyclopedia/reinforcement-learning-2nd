@@ -1,10 +1,10 @@
-from GridWorldEnv import GridWorldEnv, Policy, Value
+from GridWorldEnv import GridWorldEnv, Policy, StateValue
 import numpy as np
 
 from plot import matplot_bar3d_ex
 
 
-def policy_evaluate(policy: Policy, env: GridWorldEnv, gamma=1.0, theta=0.0001) -> Value:
+def policy_evaluate(policy: Policy, env: GridWorldEnv, gamma=1.0, theta=0.0001) -> StateValue:
     V = np.zeros(env.nS)
     k = 0
     while True:
