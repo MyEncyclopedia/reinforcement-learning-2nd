@@ -23,12 +23,11 @@ def policy_improvement(env: GridWorldEnv, policy: Policy, V: Value, gamma=1.0) -
             policy_stable = False
     return policy_stable
 
-def policy_iteration(env: GridWorldEnv, policy: Policy, gamma=1.0) -> Tuple[Policy, Value]:
 
+def policy_iteration(env: GridWorldEnv, policy: Policy, gamma=1.0) -> Tuple[Policy, Value]:
     iter = 0
     while True:
         V = policy_evaluate(policy, env, gamma)
-
         policy_stable = policy_improvement(env, policy, V)
         if policy_stable:
             return policy, V
