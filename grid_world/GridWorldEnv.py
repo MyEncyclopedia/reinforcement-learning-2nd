@@ -16,8 +16,9 @@ class Action(Enum):
 State = int
 Reward = float
 Prob = float
-Policy = Dict[State, Dict[Action, Prob]]
-Value = List[float]
+# Policy = Dict[State, Dict[Action, Prob]]
+Policy = np.ndarray
+Value = np.ndarray
 StateSet = Set[int]
 NonTerminalStateSet = Set[int]
 MDP = Dict[State, Dict[Action, List[Tuple[Prob, State, Reward, bool]]]]
