@@ -23,16 +23,18 @@ def build_reverse_mapping(env:GridWorldEnv) -> Dict[State, Set[State]]:
     return mapping
 
 
-def value_iteration_async(env:GridWorldEnv, gamma=1.0, theta=0.0001) -> Tuple[Policy, StateValue]:
+def value_iteration_async(env:GridWorldEnv, gamma=1.0, theta=0.001) -> Tuple[Policy, StateValue]:
     mapping = build_reverse_mapping(env)
 
     V = np.zeros(env.nS)
     changed_state_set = set(s for s in range(env.nS))
 
     iter = 0
+    state_count = 0
     while len(changed_state_set) > 0:
         changed_state_set_ = set()
         for s in changed_state_set:
+            state_count += 1
             action_values = action_value(env, s, V, gamma=gamma)
             best_action_value = np.max(action_values)
             v_diff = np.abs(best_action_value - V[s])
@@ -41,7 +43,7 @@ def value_iteration_async(env:GridWorldEnv, gamma=1.0, theta=0.0001) -> Tuple[Po
                 V[s] = best_action_value
         changed_state_set = changed_state_set_
         iter += 1
-        print(f'iter {iter}')
+        print(f'iter {iter}, {state_count}')
 
     policy = np.zeros([env.nS, env.nA])
     for s in range(env.nS):

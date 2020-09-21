@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def matplot_bar3d_ex(V):
+def matplot_bar3d_ex(V, title=''):
     import numpy as np
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
@@ -15,16 +15,16 @@ def matplot_bar3d_ex(V):
     _xx, _yy = np.meshgrid(_x, _y)
     x, y = _xx.ravel(), _yy.ravel()
 
-    Z = np.array([x  for x in V])
+    Z = np.array([x for x in V])
     bottom = np.zeros_like(Z)
     width = depth = 1
 
-    colours = plt.cm.rainbow_r(Z / -22)
+    colours = plt.cm.rainbow_r(Z / min(Z))
     ax.bar3d(x, y, bottom, width, depth, Z, shade=True, color=colours)
-    ax.set_title('')
-    ax.set_zlim(-30, 1.01)
-    ax.set_xticks(np.arange(0, 4))
-    ax.set_yticks(np.arange(0, 4))
+    ax.set_title(title)
+    ax.set_zlim(min(Z), 1)
+    ax.set_xticks(np.arange(0, 5))
+    ax.set_yticks(np.arange(0, 5))
 
     colour_map = plt.cm.ScalarMappable(cmap=plt.cm.rainbow_r)
     colour_map.set_array(-Z)

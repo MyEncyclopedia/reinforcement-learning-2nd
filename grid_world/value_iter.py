@@ -8,8 +8,10 @@ from plot import matplot_bar3d_ex
 from policy_iter import action_value
 
 
-def value_iteration(env:GridWorldEnv, gamma=1.0, theta=0.0001) -> Tuple[Policy, StateValue]:
+def value_iteration(env:GridWorldEnv, gamma=1.0, theta=0.001) -> Tuple[Policy, StateValue]:
     V = np.zeros(env.nS)
+    iter = 0
+    state_count = 0
     while True:
         delta = 0
         for s in range(env.nS):
@@ -17,6 +19,9 @@ def value_iteration(env:GridWorldEnv, gamma=1.0, theta=0.0001) -> Tuple[Policy, 
             best_action_value = np.max(action_values)
             delta = max(delta, np.abs(best_action_value - V[s]))
             V[s] = best_action_value
+            state_count += 1
+        iter += 1
+        print(f'iter {iter} {state_count}')
         if delta < theta:
             break
 
@@ -31,7 +36,7 @@ def value_iteration(env:GridWorldEnv, gamma=1.0, theta=0.0001) -> Tuple[Policy, 
 if __name__ == '__main__':
     env = GridWorldEnv()
     policy, v = value_iteration(env)
-    matplot_bar3d_ex(v, f'Values')
+    # matplot_bar3d_ex(v, f'Values')
 
     print("Policy Probability Distribution:")
     print(policy)
