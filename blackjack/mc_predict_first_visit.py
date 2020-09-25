@@ -4,32 +4,11 @@ from collections import defaultdict
 from typing import List, Tuple
 from typing import Tuple, Dict, Callable
 import numpy as np
-
-
 from gym.envs.toy_text import BlackjackEnv
 
+from blackjack.common import fixed_policy
 from blackjack.plotting import plot_value_function
-
-
-State: Tuple[int, bool, int]
-Action: bool
-Reward: float
-Actions: np.ndarray
-StateValue: Dict[State, float]
-ActionValue: Dict[State, np.ndarray]
-Policy: Callable[[State], Actions]
-DeterministicPolicy: Callable[[State], Action]
-
-def gen_episode_data(policy: DeterministicPolicy, env: BlackjackEnv) -> List[Tuple[State, Action, Reward]]:
-    episode_history = []
-    state = env.reset()
-    done = False
-    while not done:
-        action = policy(state)
-        next_state, reward, done, _ = env.step(action)
-        episode_history.append((state, action, reward))
-        state = next_state
-    return episode_history
+from blackjack.common import DeterministicPolicy, StateValue, gen_episode_data, fixed_policy
 
 
 def mc_prediction_first_visit(policy: DeterministicPolicy, env: BlackjackEnv,
@@ -52,12 +31,6 @@ def mc_prediction_first_visit(policy: DeterministicPolicy, env: BlackjackEnv,
     V.update({s: returns_sum[s] / returns_count[s] for s in returns_sum.keys()})
     return V
 
-def fixed_policy(observation):
-    """
-    sticks if the player score is >= 20 and hits otherwise.
-    """
-    score, dealer_score, usable_ace = observation
-    return 0 if score >= 20 else 1
 
 if __name__ == "__main__":
     env = BlackjackEnv()
