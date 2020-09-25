@@ -1,8 +1,8 @@
 from typing import Tuple
 
-from GridWorldEnv import GridWorldEnv, Policy, StateValue, ActionValue, State
-from plot import matplot_bar3d_ex
-from policy_eval import policy_evaluate
+from grid_world.GridWorldEnv import GridWorldEnv, Policy, StateValue, ActionValue, State
+from grid_world.plot import matplot_bar3d_ex
+from grid_world.policy_eval import policy_evaluate
 import numpy as np
 
 def action_value(env: GridWorldEnv, state: State, V: StateValue, gamma=1.0) -> ActionValue:

@@ -1,7 +1,8 @@
-from GridWorldEnv import GridWorldEnv, Policy, StateValue
+# from grid_world.GridWorldEnv import GridWorldEnv, Policy, StateValue
 import numpy as np
+from grid_world.GridWorldEnv import GridWorldEnv, Policy, StateValue
 
-from plot import matplot_bar3d_ex
+# from plot import matplot_bar3d_ex
 
 
 def policy_evaluate(policy: Policy, env: GridWorldEnv, gamma=1.0, theta=0.0001) -> StateValue:

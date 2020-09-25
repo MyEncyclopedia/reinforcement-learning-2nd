@@ -3,9 +3,9 @@ from typing import Tuple
 
 import numpy as np
 
-from GridWorldEnv import GridWorldEnv, Policy, StateValue, ActionValue
-from plot import matplot_bar3d_ex
-from policy_iter import action_value
+from grid_world.GridWorldEnv import GridWorldEnv, Policy, StateValue, ActionValue
+from grid_world.plot import matplot_bar3d_ex
+from grid_world.policy_iter import action_value
 
 
 def value_iteration(env:GridWorldEnv, gamma=1.0, theta=0.001) -> Tuple[Policy, StateValue]:
