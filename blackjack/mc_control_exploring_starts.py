@@ -1,38 +1,26 @@
 from collections import defaultdict
+from typing import Tuple, Dict, Callable
 
 import matplotlib
 from gym.envs.toy_text import BlackjackEnv
 import numpy as np
 
-from blackjack.plotting import plot_value_function
+State: Tuple[int, bool, int]
+Actions: np.ndarray
+ActionValue: Dict[State, np.ndarray]
+Policy: Callable[[State], Actions]
 
 
-def sample_policy(observation):
-    """
-    A policy that sticks if the player score is >= 20 and hits otherwise.
-    """
-    score, dealer_score, usable_ace = observation
-    return 0 if score >= 20 else 1
+def mc_control_es(policy, env: BlackjackEnv, num_episodes, discount_factor=1.0):
+    env.reset()
+    env.dealer[0] = 3
+    if usable:
+        env.player[0] = 1
+        env.player[1] = sum - 11
+    else:
+        env.player[0] = 2
+        env.player[1] = sum - 2
 
-def mc_prediction(policy, env, num_episodes, discount_factor=1.0):
-    """
-    Monte Carlo prediction algorithm. Calculates the value function
-    for a given policy using sampling.
-
-    Args:
-        policy: A function that maps an observation to action probabilities.
-        env: OpenAI gym environment.
-        num_episodes: Number of episodes to sample.
-        discount_factor: Gamma discount factor.
-
-    Returns:
-        A dictionary that maps from state -> value.
-        The state is a tuple and the value is a float.
-    """
-
-    # Keeps track of sum and count of returns for each state
-    # to calculate an average. We could use an array to save all
-    # returns (like in the book) but that's memory inefficient.
     returns_sum = defaultdict(float)
     returns_count = defaultdict(float)
 
@@ -72,6 +60,41 @@ def mc_prediction(policy, env, num_episodes, discount_factor=1.0):
 
     return V
 
+def plot_value_function(V, title="Value Function"):
+    """
+    Plots the value function as a surface plot.
+    """
+    from mpl_toolkits.mplot3d import Axes3D
+
+    min_x = min(k[0] for k in V.keys())
+    max_x = max(k[0] for k in V.keys())
+    min_y = min(k[1] for k in V.keys())
+    max_y = max(k[1] for k in V.keys())
+
+    x_range = np.arange(min_x, max_x + 1)
+    y_range = np.arange(min_y, max_y + 1)
+    X, Y = np.meshgrid(x_range, y_range)
+
+    # Find value for all (x, y) coordinates
+    Z_noace = np.apply_along_axis(lambda _: V[(_[0], _[1], False)], 2, np.dstack([X, Y]))
+    Z_ace = np.apply_along_axis(lambda _: V[(_[0], _[1], True)], 2, np.dstack([X, Y]))
+
+    def plot_surface(X, Y, Z, title):
+        from matplotlib import pyplot as plt
+        fig = plt.figure(figsize=(20, 10))
+        ax = fig.add_subplot(111, projection='3d')
+        surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1,
+                               cmap=matplotlib.cm.coolwarm, vmin=-1.0, vmax=1.0)
+        ax.set_xlabel('Player Sum')
+        ax.set_ylabel('Dealer Showing')
+        ax.set_zlabel('Value')
+        ax.set_title(title)
+        ax.view_init(ax.elev, -120)
+        fig.colorbar(surf)
+        plt.show()
+
+    plot_surface(X, Y, Z_noace, "{} (No Usable Ace)".format(title))
+    plot_surface(X, Y, Z_ace, "{} (Usable Ace)".format(title))
 
 if __name__ == "__main__":
     # matplotlib.style.use('ggplot')
