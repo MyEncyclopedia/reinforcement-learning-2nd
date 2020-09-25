@@ -78,6 +78,7 @@ if __name__ == "__main__":
 
     env = BlackjackEnv()
     V_10k = mc_prediction(sample_policy, env, num_episodes=10000)
+    print(V_10k)
     plot_value_function(V_10k, title="10,000 Steps")
 
     # V_500k = mc_prediction(sample_policy, env, num_episodes=50000)
