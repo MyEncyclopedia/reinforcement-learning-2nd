@@ -77,7 +77,7 @@ if __name__ == "__main__":
     # matplotlib.style.use('ggplot')
 
     env = BlackjackEnv()
-    V_10k = mc_prediction(sample_policy, env, num_episodes=10000)
+    V_10k = mc_prediction(sample_policy, env, num_episodes=100000)
     print(V_10k)
     plot_value_function(V_10k, title="10,000 Steps")
 

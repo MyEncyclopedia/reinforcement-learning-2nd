@@ -1,9 +1,5 @@
-from __future__ import annotations
-
 from collections import defaultdict
-
 from gym.envs.toy_text import BlackjackEnv
-
 from blackjack.common import DeterministicPolicy, StateValue, gen_episode_data, fixed_policy
 from blackjack.plotting import plot_value_function
 

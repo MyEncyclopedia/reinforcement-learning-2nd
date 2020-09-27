@@ -3,8 +3,8 @@ from typing import Tuple, Dict, Callable, List
 import numpy as np
 from gym.envs.toy_text import BlackjackEnv
 
-State = Tuple[int, bool, int]
-Action =  bool
+State = Tuple[int, int, bool]
+Action = bool
 Reward = float
 Actions = np.ndarray
 StateValue = Dict[State, float]

@@ -1,14 +1,7 @@
-from __future__ import annotations
-
 from collections import defaultdict
-from typing import List, Tuple
-from typing import Tuple, Dict, Callable
-import numpy as np
 from gym.envs.toy_text import BlackjackEnv
-
-from blackjack.common import fixed_policy
-from blackjack.plotting import plot_value_function
 from blackjack.common import DeterministicPolicy, StateValue, gen_episode_data, fixed_policy
+from blackjack.plotting import plot_value_function
 
 
 def mc_prediction_first_visit(policy: DeterministicPolicy, env: BlackjackEnv,
