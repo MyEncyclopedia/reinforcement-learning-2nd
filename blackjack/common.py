@@ -23,12 +23,16 @@ def gen_episode_data(policy: DeterministicPolicy, env: BlackjackEnv) -> List[Tup
         state = next_state
     return episode_history
 
-def gen_custom_s0_episode_data(policy: Policy, env: BlackjackEnv, initial_state) -> List[Tuple[State, Action, Reward]]:
+def gen_custom_s0_episode_data(policy, env: BlackjackEnv, initial_state) -> List[Tuple[State, Action, Reward]]:
     episode_history = []
     state = initial_state
     done = False
     while not done:
-        action = policy(state)
+        # print(policy)
+        A = policy[state]
+        # print(A)
+        # print('\n')
+        action = np.random.choice([0, 1], p=A / sum(A))
         next_state, reward, done, _ = env.step(action)
         episode_history.append((state, action, reward))
         state = next_state

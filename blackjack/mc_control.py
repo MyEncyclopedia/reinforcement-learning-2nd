@@ -3,6 +3,8 @@ from collections import defaultdict
 import numpy as np
 from gym.envs.toy_text import BlackjackEnv
 
+from blackjack.plotting import plot_value_function
+
 
 def make_epsilon_greedy_policy(Q, epsilon, nA):
     """
@@ -64,7 +66,7 @@ def mc_control_epsilon_greedy(env, num_episodes, discount_factor=1.0, epsilon=0.
         # Print out which episode we're on, useful for debugging.
         if i_episode % 1000 == 0:
             print("\rEpisode {}/{}.".format(i_episode, num_episodes), end="")
-            sys.stdout.flush()
+            # sys.stdout.flush()
 
         # Generate an episode.
         # An episode is an array of (state, action, reward) tuples
@@ -101,12 +103,36 @@ def mc_control_epsilon_greedy(env, num_episodes, discount_factor=1.0, epsilon=0.
 if __name__ == "__main__":
     env = BlackjackEnv()
 
-    Q, policy = mc_control_epsilon_greedy(env, num_episodes=500000, epsilon=0.1)
+    Q, policy = mc_control_epsilon_greedy(env, num_episodes=120000, epsilon=0.1)
 
-    # For plotting: Create value function from action-value function
-    # by picking the best action at each state
     V = defaultdict(float)
     for state, actions in Q.items():
         action_value = np.max(actions)
         V[state] = action_value
-    plotting.plot_value_function(V, title="Optimal Value Function")
+    # plot_value_function(V, title="Optimal Value Function")
+
+    import matplotlib.pyplot as plt
+    actions = {True: [], False: []}
+    for usable in (True, False):
+        for player in range(11, 22):
+            row = []
+            for opponent in range(1, 11):
+                s = (player, opponent, usable)
+                best_a = np.argmax(policy(s))
+                row.append(best_a)
+                print(f'{s} {best_a}')
+            actions[usable].append(row)
+
+    x, y = np.meshgrid(range(1, 11), range(11, 22))
+
+    intensity = np.array(actions[True])
+
+    plt.pcolormesh(x, y, intensity)
+    plt.colorbar() #need a colorbar to show the intensity scale
+    plt.show() #boom
+
+    intensity = np.array(actions[False])
+
+    plt.pcolormesh(x, y, intensity)
+    plt.colorbar() #need a colorbar to show the intensity scale
+    plt.show() #boom
