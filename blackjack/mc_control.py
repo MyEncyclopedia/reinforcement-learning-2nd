@@ -103,7 +103,8 @@ def mc_control_epsilon_greedy(env, num_episodes, discount_factor=1.0, epsilon=0.
 if __name__ == "__main__":
     env = BlackjackEnv()
 
-    Q, policy = mc_control_epsilon_greedy(env, num_episodes=120000, epsilon=0.1)
+    Q, policy = mc_control_epsilon_greedy(env, num_episodes=12000, epsilon=0.1)
+    print(policy((17, 5, True)))
 
     V = defaultdict(float)
     for state, actions in Q.items():
