@@ -8,7 +8,7 @@ Action = bool
 Reward = float
 Actions = np.ndarray
 StateValue = Dict[State, float]
-ActionValue = Dict[State, np.ndarray]
+ActionValue = Dict[State, Actions]
 Policy = Dict[State, Actions]
 DeterministicPolicy = Callable[[State], Action]
 

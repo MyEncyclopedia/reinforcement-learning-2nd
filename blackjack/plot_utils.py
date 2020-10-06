@@ -35,20 +35,22 @@ def plot_blackjack_values(V):
 
 def plot_policy(policy):
     def get_Z(x, y, usable_ace):
+        print(f'{x}, {y}')
         if (x, y, usable_ace) in policy:
             return np.argmax(policy[x, y, usable_ace])
         else:
             return 1
 
     def get_figure(usable_ace, ax):
-        x_range = np.arange(11, 22)
-        y_range = np.arange(10, 0, -1)
+        x_range = np.arange(1, 11)
+        y_range = np.arange(21, 10, -1)
         X, Y = np.meshgrid(x_range, y_range)
-        Z = np.array([[get_Z(x, y, usable_ace) for x in x_range] for y in y_range])
-        surf = ax.imshow(Z, cmap=plt.get_cmap('Pastel2', 2), vmin=0, vmax=1, extent=[10.5, 21.5, 0.5, 10.5])
+        Z = np.array([[get_Z(y, x, usable_ace) for x in x_range] for y in y_range])
+        surf = ax.imshow(Z, cmap=plt.get_cmap('Pastel2', 2), vmin=0, vmax=1, extent=[1, 11, 10, 21])
+        # surf = ax.imshow(Z, cmap=plt.get_cmap('Pastel2', 2), vmin=0, vmax=1)
         plt.xticks(x_range)
         plt.yticks(y_range)
-        plt.gca().invert_yaxis()
+        # plt.gca().invert_yaxis()
         ax.set_xlabel('Player\'s Current Sum')
         ax.set_ylabel('Dealer\'s Showing Card')
         ax.grid(color='w', linestyle='-', linewidth=1)
