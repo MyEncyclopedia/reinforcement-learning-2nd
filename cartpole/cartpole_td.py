@@ -23,12 +23,11 @@ class CartPoleAbstractAgent(metaclass=abc.ABCMeta):
 
         # [position, velocity, angle, angular velocity]
         env = self.env
-        self.dims = [(env.observation_space.low[0], env.observation_space.high[0], 1),
-                     (-0.5, 0.5, 1),
-                     (env.observation_space.low[2], env.observation_space.high[2], 6),
-                     (-math.radians(50) / 1., math.radians(50) / 1., 12)]
+        self.dims_config = [(env.observation_space.low[0], env.observation_space.high[0], 1),
+                            (-0.5, 0.5, 1),
+                            (env.observation_space.low[2], env.observation_space.high[2], 6),
+                            (-math.radians(50) / 1., math.radians(50) / 1., 12)]
         self.q = np.zeros(buckets + (self.env.action_space.n,))
-
         self.pi = np.zeros_like(self.q)
         self.pi[:] = 1.0 / env.action_space.n
 
@@ -37,7 +36,7 @@ class CartPoleAbstractAgent(metaclass=abc.ABCMeta):
         return min(bucket_num - 1, max(0, int(round((bucket_num - 1) * percent))))
 
     def discretize(self, obs: np.ndarray) -> State:
-        discrete_states = tuple([self.to_bin_idx(obs[d], *self.dims[d]) for d in range(len(obs))])
+        discrete_states = tuple([self.to_bin_idx(obs[d], *self.dims_config[d]) for d in range(len(obs))])
         return discrete_states
 
     def choose_action(self, state) -> Action:
@@ -82,6 +81,7 @@ class CartPoleAbstractAgent(metaclass=abc.ABCMeta):
         t = 0
         done = False
         s: State = self.discretize(self.env.reset())
+
         while not done:
             self.env.render()
             t += 1
