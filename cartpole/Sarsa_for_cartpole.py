@@ -4,7 +4,7 @@ import math
 
 
 class CartPoleAgent():
-    def __init__(self, buckets=(1, 1, 6, 12), num_episodes=1000, min_lr=0.1, min_epsilon=0.1, discount=0.98, decay=25):
+    def __init__(self, buckets=(1, 1, 6, 12), num_episodes=10000, min_lr=0.1, min_epsilon=0.1, discount=0.98, decay=25):
         self.buckets = buckets
         self.num_episodes = num_episodes
         self.min_lr = min_lr
@@ -46,14 +46,19 @@ class CartPoleAgent():
         return max(self.min_epsilon, min(1., 1. - math.log10((t + 1) / self.decay)))
 
     def get_learning_rate(self, t):
-        return max(self.min_lr, min(1., 1. - math.log10((t + 1) / self.decay)))
+        return 0.01
+        # ret = max(self.min_lr, min(1., 1. - math.log10((t + 1) / self.decay)))
+        # print(f'lr = {ret}')
+        # return ret
 
     def train(self):
         for e in range(self.num_episodes):
+            print(e)
             current_state = self.discretize_state(self.env.reset())
 
             self.learning_rate = self.get_learning_rate(e)
             self.epsilon = self.get_epsilon(e)
+            print(f'eps {self.epsilon}')
             done = False
 
             while not done:
@@ -67,7 +72,7 @@ class CartPoleAgent():
         print('Finished training!')
 
     def run(self):
-        self.env = gym.wrappers.Monitor(self.env, 'cartpole')
+        # self.env = gym.wrappers.Monitor(self.env, 'cartpole')
         t = 0
         done = False
         current_state = self.discretize_state(self.env.reset())
@@ -85,5 +90,7 @@ class CartPoleAgent():
 if __name__ == "__main__":
     agent = CartPoleAgent()
     agent.train()
-    t = agent.run()
-    print("Time", t)
+    print(agent.sarsa_table)
+    for _ in range(2):
+        t = agent.run()
+        print("Time", t)
