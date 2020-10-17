@@ -1,3 +1,4 @@
+import abc
 from typing import Tuple
 
 import gym
@@ -7,7 +8,7 @@ import math
 State = Tuple[int, int, int, int]
 Action = int
 
-class CartPoleAgent():
+class CartPoleAbstractAgent(metaclass=abc.ABCMeta):
     def __init__(self, buckets=(1, 2, 6, 12), num_episodes=8000, min_lr=0.1, min_epsilon=0.1, discount=0.98, decay=25):
         self.buckets = buckets
         self.num_episodes = num_episodes
@@ -49,23 +50,9 @@ class CartPoleAgent():
         else:
             return np.argmax(self.q[state])
 
-    def update_sarsa(self, s: State, a: Action, r, s_next: State, a_next: Action):
-        self.q[s][a] += self.lr * (r + self.discount * (self.q[s_next][a_next]) - self.q[s][a])
-
-    def update_q(self, s, a, r, s_next, a_next):
-        self.q[s][a] += self.lr * (r + self.discount * np.max(self.q[s_next]) - self.q[s][a])
-
-    def update_exp(self, s, a, r, s_next, a_next):
-        # print(np.dot(self.pi[s_next, :], self.q[s_next, :]))
-        # print(np.dot(self.pi[s_next], self.q[s_next]))
-        self.q[s][a] = self.q[s][a] + self.lr * (r + self.discount * np.dot(self.pi[s_next], self.q[s_next]) - self.q[s][a])
-        best_a = np.random.choice(np.where(self.q[s] == max(self.q[s]))[0])
-        n_actions = self.env.action_space.n
-        for i in range(n_actions):
-            if i == best_a:
-                self.pi[s][i] = 1 - (n_actions - 1) * (self.epsilon / n_actions)
-            else:
-                self.pi[s][i] = self.epsilon / n_actions
+    @abc.abstractmethod
+    def update_q(self, s: State, a: Action, r, s_next: State, a_next: Action):
+        pass
 
     def adjust_epsilon(self, t) -> float:
         self.epsilon = max(self.min_epsilon, self.epsilon * 0.99)
@@ -89,9 +76,7 @@ class CartPoleAgent():
                 obs, reward, done, _ = self.env.step(action)
                 s_next: State = self.discretize(obs)
                 a_next = self.choose_action(s_next)
-                # self.update_sarsa(s, action, reward, s_next, a_next)
-                # self.update_q(s, action, reward, s_next, a_next)
-                self.update_exp(s, action, reward, s_next, a_next)
+                self.update_q(s, action, reward, s_next, a_next)
                 s = s_next
 
         print('Finished training!')
@@ -111,9 +96,32 @@ class CartPoleAgent():
 
         return t
 
+class SarsaAgent(CartPoleAbstractAgent):
+
+    def update_q(self, s: State, a: Action, r, s_next: State, a_next: Action):
+        self.q[s][a] += self.lr * (r + self.discount * (self.q[s_next][a_next]) - self.q[s][a])
+
+
+class QLearningAgent(CartPoleAbstractAgent):
+
+    def update_q(self, s: State, a: Action, r, s_next: State, a_next: Action):
+        self.q[s][a] += self.lr * (r + self.discount * np.max(self.q[s_next]) - self.q[s][a])
+
+class ExpectedSarsaAgent(CartPoleAbstractAgent):
+
+    def update_q(self, s: State, a: Action, r, s_next: State, a_next: Action):
+        self.q[s][a] = self.q[s][a] + self.lr * (r + self.discount * np.dot(self.pi[s_next], self.q[s_next]) - self.q[s][a])
+        best_a = np.random.choice(np.where(self.q[s] == max(self.q[s]))[0])
+        n_actions = self.env.action_space.n
+        for i in range(n_actions):
+            if i == best_a:
+                self.pi[s][i] = 1 - (n_actions - 1) * (self.epsilon / n_actions)
+            else:
+                self.pi[s][i] = self.epsilon / n_actions
+
 
 if __name__ == "__main__":
-    agent = CartPoleAgent()
+    agent = SarsaAgent()
     agent.train()
     for _ in range(5):
         t = agent.test()
