@@ -57,10 +57,12 @@ class CartPoleAbstractAgent(metaclass=abc.ABCMeta):
     def adjust_epsilon(self, t) -> float:
         self.epsilon = max(self.min_epsilon, self.epsilon * 0.99)
         return self.epsilon
+        # return max(self.min_epsilon, min(1., 1. - math.log10((t + 1) / self.decay)))
 
     def adjust_learning_rate(self, t) -> float:
         self.lr = max(self.min_lr, self.lr * 0.99)
         return self.lr
+        # ret = max(self.min_lr, min(1., 1. - math.log10((t + 1) / self.decay)))
 
     def train(self):
         for e in range(self.num_episodes):
