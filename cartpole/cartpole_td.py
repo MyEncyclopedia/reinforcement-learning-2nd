@@ -10,6 +10,7 @@ Action = int
 
 
 class CartPoleAbstractAgent(metaclass=abc.ABCMeta):
+    
     def __init__(self, buckets=(1, 2, 6, 12), discount=0.98, lr_min=0.1, epsilon_min=0.1):
         self.epsilon = 1.0
         self.lr = 1.0
