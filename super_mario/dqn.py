@@ -10,39 +10,10 @@ from gym_super_mario_bros.actions import COMPLEX_MOVEMENT, RIGHT_ONLY, SIMPLE_MO
 from torch import save, FloatTensor, LongTensor
 from torch.optim import Adam
 
+from super_mario.common import ReplayMemory, Transition
 from super_mario.plot_util import plot_rewards
 from super_mario.wrappers import wrap_environment
 from super_mario.model import CNNDQN
-
-Transition = namedtuple('Transition', ('state', 'action', 'reward', 'next_state', 'done'))
-
-
-class Range:
-    def __init__(self, start, end):
-        self._start = start
-        self._end = end
-
-    def __eq__(self, input_num):
-        return self._start <= input_num <= self._end
-
-class ReplayMemory:
-
-    def __init__(self, capacity):
-        self.capacity = capacity
-        self.memory = []
-        self.position = 0
-
-    def push(self, *args):
-        if len(self.memory) < self.capacity:
-            self.memory.append(None)
-        self.memory[self.position] = Transition(*args)
-        self.position = (self.position + 1) % self.capacity
-
-    def sample(self, batch_size):
-        return random.sample(self.memory, batch_size)
-
-    def __len__(self):
-        return len(self.memory)
 
 
 ENV_NAME = 'SuperMarioBros-1-1-v0'
@@ -97,6 +68,13 @@ def train(env, model, target_model, optimizer, replay_mem: ReplayMemory, args, d
                 print(f'{episode_idx}: {episode_reward}')
                 # plot_rewards(episode_reward)
                 break
+class Range:
+    def __init__(self, start, end):
+        self._start = start
+        self._end = end
+
+    def __eq__(self, input_num):
+        return self._start <= input_num <= self._end
 
 
 def parse_args():

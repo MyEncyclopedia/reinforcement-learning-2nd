@@ -9,10 +9,7 @@ from nes_py.wrappers import JoypadSpace
 class FrameDownsample(ObservationWrapper):
     def __init__(self, env):
         super(FrameDownsample, self).__init__(env)
-        self.observation_space = Box(low=0,
-                                     high=255,
-                                     shape=(84, 84, 1),
-                                     dtype=np.uint8)
+        self.observation_space = Box(low=0, high=255, shape=(84, 84, 1), dtype=np.uint8)
         self._width = 84
         self._height = 84
 
@@ -49,26 +46,6 @@ class MaxAndSkipEnv(Wrapper):
         return obs
 
 
-class FireResetEnv(Wrapper):
-    def __init__(self, env):
-        Wrapper.__init__(self, env)
-        if len(env.unwrapped.get_action_meanings()) < 3:
-            raise ValueError('Expected an action space of at least 3!')
-
-    def reset(self, **kwargs):
-        self.env.reset(**kwargs)
-        obs, _, done, _ = self.env.step(1)
-        if done:
-            self.env.reset(**kwargs)
-        obs, _, done, _ = self.env.step(2)
-        if done:
-            self.env.reset(**kwargs)
-        return obs
-
-    def step(self, action):
-        return self.env.step(action)
-
-
 class FrameBuffer(ObservationWrapper):
     def __init__(self, env, num_steps, dtype=np.float32):
         super(FrameBuffer, self).__init__(env)
@@ -93,10 +70,7 @@ class ImageToPyTorch(ObservationWrapper):
     def __init__(self, env):
         super(ImageToPyTorch, self).__init__(env)
         obs_shape = self.observation_space.shape
-        self.observation_space = Box(low=0.0,
-                                     high=1.0,
-                                     shape=(obs_shape[::-1]),
-                                     dtype=np.float32)
+        self.observation_space = Box(low=0.0, high=1.0, shape=(obs_shape[::-1]), dtype=np.float32)
 
     def observation(self, observation):
         return np.moveaxis(observation, 2, 0)
@@ -130,8 +104,6 @@ def wrap_environment(env_name: str, action_space: list, monitor=False, iteration
         env = wrappers.Monitor(env, 'recording/run%s' % iteration, force=True)
     env = JoypadSpace(env, action_space)
     env = MaxAndSkipEnv(env)
-    if 'FIRE' in env.unwrapped.get_action_meanings():
-        env = FireResetEnv(env)
     env = FrameDownsample(env)
     env = ImageToPyTorch(env)
     env = FrameBuffer(env, 4)

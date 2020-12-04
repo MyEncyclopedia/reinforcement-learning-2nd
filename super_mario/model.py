@@ -37,8 +37,7 @@ class CNNDQN(nn.Module):
 
     def act(self, state, epsilon, device):
         if random() > epsilon:
-            state = torch.FloatTensor(np.float32(state)) \
-                .unsqueeze(0).to(device)
+            state = torch.FloatTensor(np.float32(state)).unsqueeze(0).to(device)
             q_value = self.forward(state)
             action = q_value.max(1)[1].item()
         else:
