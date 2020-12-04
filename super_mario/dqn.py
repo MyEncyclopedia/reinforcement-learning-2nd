@@ -14,7 +14,8 @@ from super_mario.plot_util import plot_rewards
 from super_mario.wrappers import wrap_environment
 from super_mario.model import CNNDQN
 
-Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward', 'done'))
+Transition = namedtuple('Transition', ('state', 'action', 'reward', 'next_state', 'done'))
+
 
 class Range:
     def __init__(self, start, end):
@@ -94,7 +95,7 @@ def train(env, model, target_model, optimizer, replay_mem: ReplayMemory, args, d
             update_graph(model, target_model, optimizer, replay_mem, args, device, episode_idx)
             if done:
                 print(f'{episode_idx}: {episode_reward}')
-                plot_rewards(episode_reward)
+                # plot_rewards(episode_reward)
                 break
 
 
@@ -119,14 +120,12 @@ def compute_td_loss(model, target_net, replay_mem: ReplayMemory, gamma, device, 
     transitions = replay_mem.sample(batch_size)
     batch = Transition(*zip(*transitions))
 
-    state, action, reward, next_state, done, indices, weights = batch
-
-    state = Variable(FloatTensor(np.float32(state))).to(device)
-    next_state = Variable(FloatTensor(np.float32(next_state))).to(device)
-    action = Variable(LongTensor(action)).to(device)
-    reward = Variable(FloatTensor(reward)).to(device)
-    done = Variable(FloatTensor(done)).to(device)
-    weights = Variable(FloatTensor(weights)).to(device)
+    state = Variable(FloatTensor(np.float32(batch.state))).to(device)
+    action = Variable(LongTensor(batch.action)).to(device)
+    reward = Variable(FloatTensor(batch.reward)).to(device)
+    next_state = Variable(FloatTensor(np.float32(batch.next_state))).to(device)
+    done = Variable(FloatTensor(batch.done)).to(device)
+    # weights = Variable(FloatTensor(weights)).to(device)
 
     q_values = model(state)
     next_q_values = target_net(next_state)
@@ -135,7 +134,8 @@ def compute_td_loss(model, target_net, replay_mem: ReplayMemory, gamma, device, 
     next_q_value = next_q_values.max(1)[0]
     expected_q_value = reward + gamma * next_q_value * (1 - done)
 
-    loss = (q_value - expected_q_value.detach()).pow(2) * weights
+    # loss = (q_value - expected_q_value.detach()).pow(2) * weights
+    loss = (q_value - expected_q_value.detach()).pow(2)
     prios = loss + 1e-5
     loss = loss.mean()
     loss.backward()
