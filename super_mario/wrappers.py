@@ -124,8 +124,8 @@ class CustomReward(Wrapper):
         return state, reward / 10.0, done, info
         
 
-def wrap_environment(environment, action_space, monitor=False, iteration=0):
-    env = make(environment)
+def wrap_environment(env_name: str, action_space: list, monitor=False, iteration=0) -> Wrapper:
+    env = make(env_name)
     if monitor:
         env = wrappers.Monitor(env, 'recording/run%s' % iteration, force=True)
     env = JoypadSpace(env, action_space)

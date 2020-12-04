@@ -10,6 +10,7 @@ from gym_super_mario_bros.actions import COMPLEX_MOVEMENT, RIGHT_ONLY, SIMPLE_MO
 from torch import save, FloatTensor, LongTensor
 from torch.optim import Adam
 
+from super_mario.plot_util import plot_rewards
 from super_mario.wrappers import wrap_environment
 from super_mario.model import CNNDQN
 
@@ -45,13 +46,12 @@ class ReplayMemory:
 
 ENV_NAME = 'SuperMarioBros-1-1-v0'
 BATCH_SIZE = 32
-BETA_FRAMES = 10000
-BETA_START = 0.4
 EPSILON_START = 1.0
 EPSILON_FINAL = 0.01
 EPSILON_DECAY = 100000
 GAMMA = 0.99
 INITIAL_LEARNING = 10000
+# INITIAL_LEARNING = 10
 LEARNING_RATE = 1e-4
 MEMORY_CAPACITY = 20000
 NUM_EPISODES = 50000
@@ -94,6 +94,7 @@ def train(env, model, target_model, optimizer, replay_mem: ReplayMemory, args, d
             update_graph(model, target_model, optimizer, replay_mem, args, device, episode_idx)
             if done:
                 print(f'{episode_idx}: {episode_reward}')
+                plot_rewards(episode_reward)
                 break
 
 
@@ -102,10 +103,10 @@ def parse_args():
     parser.add_argument('--batch-size', type=int, default=BATCH_SIZE)
     parser.add_argument('--buffer-capacity', type=int, default=MEMORY_CAPACITY)
     parser.add_argument('--env-name', type=str, default=ENV_NAME)
-    parser.add_argument('--epsilon-start', type=float, choices=[Range(0.0, 1.0)], default=EPSILON_START, metavar='EPSILON_START')
-    parser.add_argument('--epsilon-final', type=float, choices=[Range(0.0, 1.0)], default=EPSILON_FINAL, metavar='EPSILON_FINAL')
+    parser.add_argument('--epsilon-start', type=float, choices=[Range(0.0, 1.0)], default=EPSILON_START)
+    parser.add_argument('--epsilon-final', type=float, choices=[Range(0.0, 1.0)], default=EPSILON_FINAL)
     parser.add_argument('--epsilon-decay', type=int, default=EPSILON_DECAY)
-    parser.add_argument('--gamma', type=float, choices=[Range(0.0, 1.0)], default=GAMMA, metavar='GAMMA')
+    parser.add_argument('--gamma', type=float, choices=[Range(0.0, 1.0)], default=GAMMA)
     parser.add_argument('--initial-learning', type=int, default=INITIAL_LEARNING)
     parser.add_argument('--learning-rate', type=int, default=LEARNING_RATE)
     parser.add_argument('--num-episodes', type=int, default=NUM_EPISODES)
@@ -115,7 +116,9 @@ def parse_args():
     return parser.parse_args()
 
 def compute_td_loss(model, target_net, replay_mem: ReplayMemory, gamma, device, batch_size):
-    batch = replay_mem.sample(batch_size)
+    transitions = replay_mem.sample(batch_size)
+    batch = Transition(*zip(*transitions))
+
     state, action, reward, next_state, done, indices, weights = batch
 
     state = Variable(FloatTensor(np.float32(state))).to(device)
@@ -146,11 +149,11 @@ def update_epsilon(episode, args):
     return epsilon
 
 
-
 def main():
     args = parse_args()
     env = wrap_environment(args.env_name, RIGHT_ONLY)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
     model = CNNDQN(env.observation_space.shape, env.action_space.n).to(device)
     target_model = CNNDQN(env.observation_space.shape, env.action_space.n).to(device)
 
