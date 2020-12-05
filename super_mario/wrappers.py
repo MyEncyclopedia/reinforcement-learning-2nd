@@ -6,8 +6,6 @@ from gym.spaces import Box
 from nes_py.wrappers import JoypadSpace
 
 
-
-
 class MaxAndSkipFrameWrapper(Wrapper):
     def __init__(self, env=None, skip=4):
         super(MaxAndSkipFrameWrapper, self).__init__(env)

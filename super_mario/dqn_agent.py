@@ -41,7 +41,7 @@ class DQNAgent():
 
     def train(self, episode_idx):
         if len(self.replay_mem) > self.initial_learning:
-            if not episode_idx % self.target_update_frequency:
+            if episode_idx % self.target_update_frequency == 0:
                 self.target_model.load_state_dict(self.model.state_dict())
             self.optimizer.zero_grad()
             self.td_loss_backprop()
@@ -56,7 +56,6 @@ class DQNAgent():
         reward = Variable(FloatTensor(batch.reward)).to(self.device)
         next_state = Variable(FloatTensor(np.float32(batch.next_state))).to(self.device)
         done = Variable(FloatTensor(batch.done)).to(self.device)
-        # weights = Variable(FloatTensor(weights)).to(device)
 
         q_values = self.model(state)
         next_q_values = self.target_net(next_state)
