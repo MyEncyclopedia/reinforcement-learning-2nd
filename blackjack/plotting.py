@@ -74,7 +74,7 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
 
     # Plot the episode reward over time
     fig2 = plt.figure(figsize=(10,5))
-    rewards_smoothed = pd.Series(stats.episode_rewards).rolling(smoothing_window, min_periods=smoothing_window).mean()
+    rewards_smoothed = pd.Series(stats.episode_reward_lst).rolling(smoothing_window, min_periods=smoothing_window).mean()
     plt.plot(rewards_smoothed)
     plt.xlabel("Episode")
     plt.ylabel("Episode Reward (Smoothed)")
