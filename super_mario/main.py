@@ -26,6 +26,7 @@ def train(env, args, agent):
             action = agent.act(state, episode_idx)
             if args.render:
                 env.render()
+            print('\n')
             next_state, reward, done, stats = env.step(action)
             agent.process(episode_idx, state, action, reward, next_state, done)
             state = next_state

@@ -6,12 +6,11 @@ from torch.autograd import Variable
 from torch.optim import Adam
 import numpy as np
 from super_mario.common import ReplayMemory, Transition
-from super_mario.model import DQNModel
+from super_mario.model import CNNDQN
 
 
 class DQNAgent():
-    def __init__(self, env, buffer_capacity, epsilon_start, epsilon_final, epsilon_decay, lr,
-                 initial_learning, gamma, target_update_frequency):
+    def __init__(self, env, buffer_capacity, epsilon_start, epsilon_final, epsilon_decay, lr, initial_learning, gamma, target_update_frequency):
         self.replay_mem = ReplayMemory(buffer_capacity)
         self.epsilon_start = epsilon_start
         self.epsilon_final = epsilon_final
@@ -22,8 +21,8 @@ class DQNAgent():
 
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-        self.model = DQNModel(env.observation_space.shape, env.action_space.n).to(self.device)
-        self.target_model = DQNModel(env.observation_space.shape, env.action_space.n).to(self.device)
+        self.model = CNNDQN(env.observation_space.shape, env.action_space.n).to(self.device)
+        self.target_model = CNNDQN(env.observation_space.shape, env.action_space.n).to(self.device)
         self.optimizer = Adam(self.model.parameters(), lr=lr)
 
     def update_epsilon(self, episode_idx):
@@ -37,17 +36,17 @@ class DQNAgent():
 
     def process(self, episode_idx, state, action, reward, next_state, done):
         self.replay_mem.push(state, action, reward, next_state, done)
-        self.train(episode_idx)
+        self.update_graph(episode_idx)
 
-    def train(self, episode_idx):
+    def update_graph(self, episode_idx):
         if len(self.replay_mem) > self.initial_learning:
             if not episode_idx % self.target_update_frequency:
                 self.target_model.load_state_dict(self.model.state_dict())
             self.optimizer.zero_grad()
-            self.td_loss_backprop()
+            self.compute_td_loss()
             self.optimizer.step()
 
-    def td_loss_backprop(self):
+    def compute_td_loss(self):
         transitions = self.replay_mem.sample(self.batch_size)
         batch = Transition(*zip(*transitions))
 
@@ -65,7 +64,9 @@ class DQNAgent():
         next_q_value = next_q_values.max(1)[0]
         expected_q_value = reward + self.gamma * next_q_value * (1 - done)
 
+        # loss = (q_value - expected_q_value.detach()).pow(2) * weights
         loss = (q_value - expected_q_value.detach()).pow(2)
+        prios = loss + 1e-5
         loss = loss.mean()
         loss.backward()
 

@@ -5,9 +5,9 @@ import torch
 import torch.nn as nn
 
 
-class CNNDQN(nn.Module):
+class DQNModel(nn.Module):
     def __init__(self, input_shape, num_actions):
-        super(CNNDQN, self).__init__()
+        super(DQNModel, self).__init__()
         self._input_shape = input_shape
         self._num_actions = num_actions
 

@@ -6,28 +6,30 @@ from gym.spaces import Box
 from nes_py.wrappers import JoypadSpace
 
 
-class FrameDownsample(ObservationWrapper):
+class FrameDownsampleWrapper(ObservationWrapper):
     def __init__(self, env):
-        super(FrameDownsample, self).__init__(env)
+        super(FrameDownsampleWrapper, self).__init__(env)
         self.observation_space = Box(low=0, high=255, shape=(84, 84, 1), dtype=np.uint8)
         self._width = 84
         self._height = 84
 
-    def observation(self, observation):
-        frame = cv2.cvtColor(observation, cv2.COLOR_RGB2GRAY)
+    def observation(self, obs): # [240, 256, 3] -> [84, 84, 1]
+        print(f'in FrameDownsample ob {obs.shape}')
+        frame = cv2.cvtColor(obs, cv2.COLOR_RGB2GRAY)
         frame = cv2.resize(frame,
                            (self._width, self._height),
                            interpolation=cv2.INTER_AREA)
         return frame[:, :, None]
 
 
-class MaxAndSkipEnv(Wrapper):
+class MaxAndSkipFrameWrapper(Wrapper):
     def __init__(self, env=None, skip=4):
-        super(MaxAndSkipEnv, self).__init__(env)
+        super(MaxAndSkipFrameWrapper, self).__init__(env)
         self._obs_buffer = deque(maxlen=2)
         self._skip = skip
 
     def step(self, action):
+        print('in MaxAndSkipEnv step')
         total_reward = 0.0
         done = None
         for _ in range(self._skip):
@@ -60,9 +62,10 @@ class FrameBuffer(ObservationWrapper):
                                     dtype=self._dtype)
         return self.observation(self.env.reset())
 
-    def observation(self, observation):
+    def observation(self, obs):
+        print(f'in FrameBuffer ob {obs.shape}')
         self.buffer[:-1] = self.buffer[1:]
-        self.buffer[-1] = observation
+        self.buffer[-1] = obs
         return self.buffer
 
 
@@ -72,12 +75,14 @@ class ImageToPyTorch(ObservationWrapper):
         obs_shape = self.observation_space.shape
         self.observation_space = Box(low=0.0, high=1.0, shape=(obs_shape[::-1]), dtype=np.float32)
 
-    def observation(self, observation):
-        return np.moveaxis(observation, 2, 0)
+    def observation(self, obs):
+        print(f'in ImageToPyTorch ob {obs.shape}')
+        return np.moveaxis(obs, 2, 0)
 
 
 class NormalizeFloats(ObservationWrapper):
     def observation(self, obs):
+        print(f'in NormalizeFloats ob {obs.shape}')
         return np.array(obs).astype(np.float32) / 255.0
 
 
@@ -87,6 +92,7 @@ class CustomReward(Wrapper):
         self._current_score = 0
 
     def step(self, action):
+        print('in CustomReward step')
         state, reward, done, info = self.env.step(action)
         reward += (info['score'] - self._current_score) / 40.0
         self._current_score = info['score']
@@ -103,8 +109,8 @@ def wrap_environment(env_name: str, action_space: list, monitor=False, iteration
     if monitor:
         env = wrappers.Monitor(env, 'recording/run%s' % iteration, force=True)
     env = JoypadSpace(env, action_space)
-    env = MaxAndSkipEnv(env)
-    env = FrameDownsample(env)
+    env = MaxAndSkipFrameWrapper(env)
+    env = FrameDownsampleWrapper(env)
     env = ImageToPyTorch(env)
     env = FrameBuffer(env, 4)
     env = NormalizeFloats(env)
